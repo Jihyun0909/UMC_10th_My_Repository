@@ -1,0 +1,24 @@
+{
+  "name": "umc-node-project",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jihyun0909/umc_10th_my_repository.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jihyun0909/umc_10th_my_repository/issues"
+  },
+  "homepage": "https://github.com/jihyun0909/umc_10th_my_repository#readme",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
