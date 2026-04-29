@@ -1,1 +1,0 @@
-# UMC_10th_My_Repository
