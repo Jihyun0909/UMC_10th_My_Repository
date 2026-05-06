@@ -1,5 +1,5 @@
 ---
-name: 'Fix:'
+name: ":hammer:Fix:"
 about: 문제 해결 및 수정용 템플릿입니다.
 title: ''
 labels: fix

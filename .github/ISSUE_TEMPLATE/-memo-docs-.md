@@ -1,5 +1,5 @@
 ---
-name: 'docs:'
+name: ":memo:docs:"
 about: 문서 수정 및 추가 템플릿입니다
 title: ''
 labels: ":memo: docs"

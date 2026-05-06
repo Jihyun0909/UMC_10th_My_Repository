@@ -1,5 +1,5 @@
 ---
-name: 'test:'
+name: ":test_tube:test:"
 about: 테스트 코드 추가 템플릿입니다
 title: ''
 labels: test
