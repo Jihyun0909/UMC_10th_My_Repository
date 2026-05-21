@@ -2,8 +2,6 @@ export interface CreateStoreRequestDto {
   name: string;
   address: string;
   categoryId: number; // ERD의 category_id와 매칭
-<<<<<<< HEAD
-=======
 }
 
 export const responseFromReviews = (reviews: any[]) => {
@@ -31,5 +29,4 @@ export interface ReviewListResponse {
   pagination: {
     cursor: number | null;
   };
->>>>>>> feature/chapter-06
 }

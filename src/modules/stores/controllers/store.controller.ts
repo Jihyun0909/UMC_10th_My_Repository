@@ -1,13 +1,8 @@
 import { Request, Response, NextFunction } from "express";
-<<<<<<< HEAD
-import { createStore } from "../services/store.services.js"; // 확장자 .js 확인!
-import { CreateStoreRequestDto } from "../dtos/store.dtos.js";
-=======
 import { createStore, listStoreReviews } from "../services/store.services.js"; // 확장자 .js 확인!
 import { CreateStoreRequestDto } from "../dtos/store.dtos.js";
 import { StatusCodes } from "http-status-codes";
 
->>>>>>> feature/chapter-06
 
 export const handleAddStore = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -36,8 +31,6 @@ export const handleAddStore = async (req: Request, res: Response, next: NextFunc
       message: error.message
     });
   }
-<<<<<<< HEAD
-=======
 };
 
 export const handleListStoreReviews = async (
@@ -58,5 +51,4 @@ export const handleListStoreReviews = async (
   } catch (err) {
     next(err);
   }
->>>>>>> feature/chapter-06
 };
