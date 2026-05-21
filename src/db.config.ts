@@ -1,52 +1,26 @@
-<<<<<<< HEAD
-import mysql from "mysql2/promise";
-=======
 import { PrismaClient } from "./generated/prisma/index.js";
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
-import mysql from "mysql2/promise"; // 👈 다시 이거 하나만 쓰면 돼!
->>>>>>> feature/chapter-06
 import dotenv from "dotenv";
 
 dotenv.config();
 
-<<<<<<< HEAD
-export const pool = mysql.createPool({
-  host: process.env.DB_HOST || "localhost", // mysql의 hostname
-  user: process.env.DB_USER || "root", // user 이름
-  port: parseInt(process.env.DB_PORT || "3306"), // 포트 번호
-  // 환경 변수는 기본적으로 문자열이에요. 숫자가 필요한 port 필드를 위해 parseInt로 형변환을 해줍니다! 
-  database: process.env.DB_NAME || "umc_10th", // 데이터베이스 이름
-  password: process.env.DB_PASSWORD || "password", // 비밀번호
-  waitForConnections: true,
-  // Pool에 획득할 수 있는 connection이 없을 때,
-  // true면 요청을 queue에 넣고 connection을 사용할 수 있게 되면 요청을 실행하며, false이면 즉시 오류를 내보내고 다시 요청
-  connectionLimit: 10, // 몇 개의 커넥션을 가지게끔 할 것인지
-  queueLimit: 0, // getConnection에서 오류가 발생하기 전에 Pool에 대기할 요청의 개수 한도
-});
-=======
-// 1. 실제 DB 접속 정보 (여기에 지현이 진짜 비번 적기!)
+// 1. 로컬 DB 계정 정보 설정
 const dbConfig = {
-  host: "127.0.0.1",
-  user: "root",
-  password: "test1234", // 🚨 데이터그립 들어갈 때 쓰는 진짜 비번!
-  database: "umc_prisma",
-  port: 3306,
+  host: process.env.DB_HOST || "127.0.0.1",
+  user: process.env.DB_USER || "root",
+  password: process.env.DB_PASSWORD || "test1234", // 👈 데이터그립 들어갈 때 쓰는 비밀번호!
+  database: process.env.DB_NAME || "umc_prisma",
+  port: Number(process.env.DB_PORT) || 3306,
 };
 
-// 2. Prisma용 마리아DB 어댑터 생성 (설정 객체를 바로 넣어주기!)
-const adapter = new PrismaMariaDb(dbConfig); // 👈 pool 객체 대신 dbConfig를 바로 쏙!
+// 2. 프리즈마 전용 마리아DB 어댑터 객체 생성
+const adapter = new PrismaMariaDb(dbConfig);
 
-// 3. PrismaClient에 어댑터 주입
+/**
+ * 7주차 TSOA 및 전역 에러 핸들링 연동을 위한 어댑터 주입형 Prisma 인스턴스
+ * (Prisma Client 생성자 검증 에러를 완벽하게 해소합니다)
+ */
 export const prisma = new PrismaClient({
-  adapter, 
+  adapter: adapter, // 👈 생성자 에러 원인이었던 adapter를 명시적으로 전달!
   log: ["query", "info", "warn", "error"],
 });
-
-// 4. 기존 Express 앱에서 쓰던 Promise용 pool
-export const pool = mysql.createPool({
-  ...dbConfig,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-});
->>>>>>> feature/chapter-06
