@@ -9,11 +9,13 @@
 		"schemas": {
 			"UserSignUpResponse": {
 				"properties": {
-					"userId": {
-						"type": "number",
-						"format": "double"
+					"email": {
+						"type": "string"
 					},
-					"preferences": {
+					"name": {
+						"type": "string"
+					},
+					"preferCategory": {
 						"items": {
 							"type": "string"
 						},
@@ -21,8 +23,9 @@
 					}
 				},
 				"required": [
-					"userId",
-					"preferences"
+					"email",
+					"name",
+					"preferCategory"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -67,8 +70,7 @@
 						"type": "string"
 					},
 					"birth": {
-						"type": "string",
-						"format": "date-time"
+						"type": "string"
 					},
 					"address": {
 						"type": "string"

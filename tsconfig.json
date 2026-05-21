@@ -1,34 +1,35 @@
 {
   "compilerOptions": {
-    "module": "nodenext",
-    "target": "esnext",
+    /* TSOA 데코레이터 문법 허용 */
     "experimentalDecorators": true,
-    
-    /* 1. types에 node를 넣어줘야 process를 알아봐요! */
-    "types": ["node"], 
-    
-    /* 2. lib 설정도 esnext로 깨워주자 */
-    "lib": ["esnext"],
 
+    /* 1. 출력 폴더 설정 (rootDir를 과감히 삭제해서 바깥에 있는 프리즈마 파일까지 포용합니다) */
+    "outDir": "./dist",           
+
+    /* 2. 언어 및 모듈 시스템 설정 (ESM 방식 완벽 유지) */
+    "target": "ESNext",           
+    "module": "NodeNext",         
+    "moduleResolution": "NodeNext", 
+    "lib": ["ESNext"],            
+
+    /* 3. 환경 변수(process.env) 인식용 타입 추가 */
+    "types": ["node"], 
+
+    /* 4. 엄격한 검사 옵션 */
+    "strict": true,               
+    "noUncheckedIndexedAccess": true, 
+    "exactOptionalPropertyTypes": true,
+    "isolatedModules": true,
+
+    /* 5. 라이브러리 및 에러 방지 추천 옵션 */
+    "skipLibCheck": true,         
+    "esModuleInterop": true,      
+    "forceConsistentCasingInFileNames": true, 
     "sourceMap": true,
     "declaration": true,
-    "declarationMap": true,
-
-    "noUncheckedIndexedAccess": true,
-    
-    /* 🚨 TSOA 7버전 자동 생성 파일 충돌 방지를 위해 false로 수정 완료! */
-    "exactOptionalPropertyTypes": false,
-
-    "strict": true,
-    "jsx": "react-jsx",
-    "verbatimModuleSyntax": false,
-    "isolatedModules": true,
-    "noUncheckedSideEffectImports": true,
-    "moduleDetection": "force",
-    "skipLibCheck": true,
-    "esModuleInterop": true
+    "declarationMap": true
   },
-  /* 3. 이 부분이 빠지면 바깥에 있는 prisma.config.ts를 무시해버려! */
-  "include": ["src/**/*", "prisma.config.ts"],
-  "exclude": ["node_modules", "dist"]
+  /* 6. 컴파일 및 검사 대상 파일 지정 */
+  "include": ["src/**/*", "prisma.config.ts"],  
+  "exclude": ["node_modules", "dist"] 
 }

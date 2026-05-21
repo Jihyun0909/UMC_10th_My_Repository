@@ -15,8 +15,9 @@ const models: TsoaRoute.Models = {
     "UserSignUpResponse": {
         "dataType": "refObject",
         "properties": {
-            "userId": {"dataType":"double","required":true},
-            "preferences": {"dataType":"array","array":{"dataType":"string"},"required":true},
+            "email": {"dataType":"string","required":true},
+            "name": {"dataType":"string","required":true},
+            "preferCategory": {"dataType":"array","array":{"dataType":"string"},"required":true},
         },
         "additionalProperties": false,
     },
@@ -37,7 +38,7 @@ const models: TsoaRoute.Models = {
             "email": {"dataType":"string","required":true},
             "name": {"dataType":"string","required":true},
             "gender": {"dataType":"string","required":true},
-            "birth": {"dataType":"datetime","required":true},
+            "birth": {"dataType":"string","required":true},
             "address": {"dataType":"string"},
             "detailAddress": {"dataType":"string"},
             "phoneNumber": {"dataType":"string","required":true},
