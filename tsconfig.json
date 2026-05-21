@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+<<<<<<< HEAD
     /* 프로젝트 구조 설정 */
     "rootDir": "./src",            // 소스 코드(.ts)가 모여있는 폴더예요.
     "outDir": "./dist",           // 컴파일된 결과물(.js)이 저장될 폴더예요.
@@ -22,4 +23,34 @@
   },
   "include": ["src/**/*"],        
   "exclude": ["node_modules", "dist"] // 빌드 결과물(dist)도 검사에서 제외하는 게 좋아요!
+=======
+    "module": "nodenext",
+    "target": "esnext",
+    
+    /* 1. types에 node를 넣어줘야 process를 알아봐요! */
+    "types": ["node"], 
+    
+    /* 2. lib 설정도 esnext로 깨워주자 */
+    "lib": ["esnext"],
+
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
+
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+
+    "strict": true,
+    "jsx": "react-jsx",
+    "verbatimModuleSyntax": false,
+    "isolatedModules": true,
+    "noUncheckedSideEffectImports": true,
+    "moduleDetection": "force",
+    "skipLibCheck": true,
+    "esModuleInterop": true
+  },
+  /* 3. 이 부분이 빠지면 바깥에 있는 prisma.config.ts를 무시해버려! */
+  "include": ["src/**/*", "prisma.config.ts"],
+  "exclude": ["node_modules", "dist"]
+>>>>>>> feature/chapter-06
 }

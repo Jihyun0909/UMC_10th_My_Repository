@@ -7,7 +7,7 @@ import { handleAddReview } from "./modules/stores/controllers/review.controller.
 import { handleAddMission } from "./modules/stores/controllers/mission.controller.js";
 import { handleChallengeMission } from "./modules/stores/controllers/mission.controller.js";
 import { memberSignUpController } from "./modules/stores/controllers/member.controller.js";
-
+import { handleListStoreReviews } from "./modules/stores/controllers/store.controller.js";
 // 1. 환경 변수 설정
 dotenv.config();
 
@@ -24,6 +24,10 @@ app.use(express.urlencoded({ extended: false })); // 단순 객체 문자열 형
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello World! This is TypeScript Server!");
 });
+<<<<<<< HEAD
+=======
+app.get("/api/v1/stores/:storeId/reviews", handleListStoreReviews);
+>>>>>>> feature/chapter-06
 
 app.post("/api/v1/users/signup", handleUserSignUp);
 app.post("/api/v1/regions/:regionId/stores", handleAddStore);

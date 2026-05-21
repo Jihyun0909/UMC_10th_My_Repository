@@ -10,6 +10,15 @@ export interface UserSignUpRequest {
   preferences: number[];
 }
 
+<<<<<<< HEAD
+=======
+export interface UserSignUpResponse {
+  email: string;
+  name: string;
+  preferCategory: string[];
+}
+
+>>>>>>> feature/chapter-06
 // 2. 요청받은 데이터를 우리 시스템에 맞는 데이터로 변환해주는 함수입니다. 
 export const bodyToUser = (body: UserSignUpRequest) => {
   const birth = new Date(body.birth); //날짜 변환
@@ -27,6 +36,7 @@ export const bodyToUser = (body: UserSignUpRequest) => {
 };
 
 // 2. 유저 정보와 선호 카테고리 정보를 받아 클라이언트 응답용 객체로 변환하는 함수
+<<<<<<< HEAD
 export const responseFromUser = (data: { user: any; preferences: any[] }) => {
   return {
     email: data.user.email,
@@ -39,3 +49,15 @@ export const responseFromUser = (data: { user: any; preferences: any[] }) => {
     preferences: data.preferences, // 선호 카테고리 리스트
   };
 };
+=======
+export const responseFromUser= (data: {user:any, preferences: any[]}): UserSignUpResponse => {
+    const perferCategory= data.preferences.map((p)=>p.foodCategory.name);
+
+    return {
+        email: data.user.email,
+        name: data.user.name,
+        preferCategory: perferCategory,
+    }
+
+}
+>>>>>>> feature/chapter-06

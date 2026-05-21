@@ -1,6 +1,13 @@
 import { Request, Response, NextFunction } from "express";
+<<<<<<< HEAD
 import { createStore } from "../services/store.services.js"; // 확장자 .js 확인!
 import { CreateStoreRequestDto } from "../dtos/store.dtos.js";
+=======
+import { createStore, listStoreReviews } from "../services/store.services.js"; // 확장자 .js 확인!
+import { CreateStoreRequestDto } from "../dtos/store.dtos.js";
+import { StatusCodes } from "http-status-codes";
+
+>>>>>>> feature/chapter-06
 
 export const handleAddStore = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -29,4 +36,27 @@ export const handleAddStore = async (req: Request, res: Response, next: NextFunc
       message: error.message
     });
   }
+<<<<<<< HEAD
+=======
+};
+
+export const handleListStoreReviews = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const storeId = parseInt(req.params.storeId as string, 10);
+    const cursor =
+    typeof req.query.cursor === "string"
+      ? parseInt(req.query.cursor, 10)
+      : 0;
+
+    const reviews = await listStoreReviews(storeId, cursor);
+
+    res.status(StatusCodes.OK).json(reviews);
+  } catch (err) {
+    next(err);
+  }
+>>>>>>> feature/chapter-06
 };

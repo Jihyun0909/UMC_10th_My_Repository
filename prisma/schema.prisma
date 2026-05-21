@@ -1,0 +1,108 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma" 
+  engineType = "library"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model User {
+  id            Int      @id @default(autoincrement())
+  email         String   @unique(map: "email") @db.VarChar(255)
+  name          String   @db.VarChar(100)
+  gender        String   @db.VarChar(15)
+  birth         DateTime @db.Date
+  address       String   @db.VarChar(255)
+  detailAddress String?  @map("detail_address") @db.VarChar(255)
+  phoneNumber   String   @map("phone_number") @db.VarChar(15)
+
+  userFavorCategories UserFavorCategory[]
+  reviews             Review[]             // User 모델에서 Review를 볼 수 있게 추가
+  userMissions        UserMission[]        // User 모델에서 참여 미션을 볼 수 있게 추가
+
+  @@map("user")
+}
+
+model FoodCategory {
+  id   Int    @id @default(autoincrement())
+  name String @db.VarChar(100)
+
+  userFavorCategories UserFavorCategory[]
+
+  @@map("food_category")
+}
+
+model UserFavorCategory {
+  id             Int          @id @default(autoincrement())
+  user           User         @relation(fields: [userId], references: [id])
+  userId         Int          @map("user_id")
+  foodCategory   FoodCategory @relation(fields: [foodCategoryId], references: [id])
+  foodCategoryId Int          @map("food_category_id")
+
+  @@index([foodCategoryId], map: "f_category_id")
+  @@index([userId], map: "user_id")
+  @@map("user_favor_category")
+}
+
+// 가게 정보 (Store)
+model Store {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(50)
+  address   String   @db.VarChar(50)
+  category  String   @db.VarChar(15) // 일식, 중식 등
+
+  reviews   Review[]
+  missions  Mission[]
+
+  @@map("store")
+}
+
+// 리뷰 (Review)
+model Review {
+  id        Int      @id @default(autoincrement())
+  body      String   @db.Text
+  score     Float
+
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int      @map("user_id")
+  store     Store    @relation(fields: [storeId], references: [id])
+  storeId   Int      @map("store_id")
+
+  @@map("review")
+}
+
+// 미션 (Mission)
+model Mission {
+  id          Int      @id @default(autoincrement())
+  reward      Int      // 보상 포인트
+  deadline    DateTime // 마감일
+  missionSpec String   @db.Text @map("mission_spec") // 미션 상세 내용
+
+  store       Store    @relation(fields: [storeId], references: [id])
+  storeId     Int      @map("store_id")
+
+  userMissions UserMission[]
+
+  @@map("mission")
+}
+
+// 유저-미션 연결 테이블 (UserMission) - 미션 도전 현황
+model UserMission {
+  id        Int      @id @default(autoincrement())
+  status    String   @db.VarChar(15) // '진행중', '성공' 등
+
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int      @map("user_id")
+  mission   Mission  @relation(fields: [missionId], references: [id])
+  missionId Int      @map("mission_id")
+
+  @@map("member_mission")
+}

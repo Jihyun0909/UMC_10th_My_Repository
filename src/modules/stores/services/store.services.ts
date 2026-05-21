@@ -1,6 +1,14 @@
+<<<<<<< HEAD
 import { addStore, checkRegionExists } from "../repositories/store.repositories";
 import { CreateStoreRequestDto } from "../dtos/store.dtos";
 
+=======
+import { addStore, checkRegionExists, getAllStoreReviews } from "../repositories/store.repositories";
+import { CreateStoreRequestDto, responseFromReviews, ReviewListResponse } from "../dtos/store.dtos";
+import { prisma } from "../../../db.config.js";
+
+// 가게 등록
+>>>>>>> feature/chapter-06
 export const createStore = async (regionId: number, storeData: CreateStoreRequestDto) => {
   const isExist = await checkRegionExists(regionId);
   if (!isExist) {
@@ -9,4 +17,17 @@ export const createStore = async (regionId: number, storeData: CreateStoreReques
 
   const storeId = await addStore(regionId, storeData);
   return { storeId };
+<<<<<<< HEAD
 };
+=======
+};
+
+export const listStoreReviews = async (
+  storeId: number,
+  cursor: number
+): Promise<ReviewListResponse> => {
+  const reviews = await getAllStoreReviews(storeId, cursor);
+  return responseFromReviews(reviews);
+};
+
+>>>>>>> feature/chapter-06
