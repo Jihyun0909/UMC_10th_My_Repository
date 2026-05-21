@@ -1,32 +1,26 @@
 import { PrismaClient } from "./generated/prisma/index.js";
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
-import mysql from "mysql2/promise"; // 👈 다시 이거 하나만 쓰면 돼!
 import dotenv from "dotenv";
 
 dotenv.config();
 
-// 1. 실제 DB 접속 정보 (여기에 지현이 진짜 비번 적기!)
+// 1. 로컬 DB 계정 정보 설정
 const dbConfig = {
-  host: "127.0.0.1",
-  user: "root",
-  password: "test1234", // 🚨 데이터그립 들어갈 때 쓰는 진짜 비번!
-  database: "umc_prisma",
-  port: 3306,
+  host: process.env.DB_HOST || "127.0.0.1",
+  user: process.env.DB_USER || "root",
+  password: process.env.DB_PASSWORD || "test1234", // 👈 데이터그립 들어갈 때 쓰는 비밀번호!
+  database: process.env.DB_NAME || "umc_prisma",
+  port: Number(process.env.DB_PORT) || 3306,
 };
 
-// 2. Prisma용 마리아DB 어댑터 생성 (설정 객체를 바로 넣어주기!)
-const adapter = new PrismaMariaDb(dbConfig); // 👈 pool 객체 대신 dbConfig를 바로 쏙!
+// 2. 프리즈마 전용 마리아DB 어댑터 객체 생성
+const adapter = new PrismaMariaDb(dbConfig);
 
-// 3. PrismaClient에 어댑터 주입
+/**
+ * 7주차 TSOA 및 전역 에러 핸들링 연동을 위한 어댑터 주입형 Prisma 인스턴스
+ * (Prisma Client 생성자 검증 에러를 완벽하게 해소합니다)
+ */
 export const prisma = new PrismaClient({
-  adapter, 
+  adapter: adapter, // 👈 생성자 에러 원인이었던 adapter를 명시적으로 전달!
   log: ["query", "info", "warn", "error"],
-});
-
-// 4. 기존 Express 앱에서 쓰던 Promise용 pool
-export const pool = mysql.createPool({
-  ...dbConfig,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
 });

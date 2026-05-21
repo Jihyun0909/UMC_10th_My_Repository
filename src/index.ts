@@ -1,39 +1,61 @@
 import dotenv from "dotenv";
-import express, { Express, Request, Response } from "express";
+import express, { Express, Request, Response, NextFunction } from "express";
 import cors from "cors";
-import { handleUserSignUp } from "./modules/users/controllers/user.controller.js";
-import { handleAddStore } from "./modules/stores/controllers/store.controller.js";
-import { handleAddReview } from "./modules/stores/controllers/review.controller.js";
-import { handleAddMission } from "./modules/stores/controllers/mission.controller.js";
-import { handleChallengeMission } from "./modules/stores/controllers/mission.controller.js";
-import { memberSignUpController } from "./modules/stores/controllers/member.controller.js";
-import { handleListStoreReviews } from "./modules/stores/controllers/store.controller.js";
+import morgan from "morgan";            // 공통 미션: 로그 출력 미들웨어
+import cookieParser from "cookie-parser"; // 공통 미션: 쿠키 파싱 미들웨어
+import { RegisterRoutes } from "./generated/routes.js";
+import { AppError } from "./common/errors/app.error.js";
+
 // 1. 환경 변수 설정
 dotenv.config();
 
 const app: Express = express();
 const port = process.env.PORT || 3000;
 
-// 2. 미들웨어 설정
-app.use(cors());            // cors 방식 허용                 
-app.use(express.static('public'));    // 정적 파일 접근      
-app.use(express.json());              // request의 본문을 json으로 해석할 수 있도록 함(JSON 형태의 요청 body를 파싱하기 위함)     
-app.use(express.urlencoded({ extended: false })); // 단순 객체 문자열 형태로 본문 데이터 해석
-
-// 3. 기본 라우트
-app.get("/", (req: Request, res: Response) => {
-  res.send("Hello World! This is TypeScript Server!");
+// ⭐️ [해결 핵심]: res 객체를 임시로 any로 변환하여 에러 확장 방식 우회
+app.use((req: Request, res: Response, next: NextFunction) => {
+  (res as any).error = function ({ errorCode = null, message = null, data = null }) {
+    return this.json({
+      resultType: "FAIL", 
+      error: { errorCode, message, data },
+      success: null,
+    });
+  };
+  next();
 });
-app.get("/api/v1/stores/:storeId/reviews", handleListStoreReviews);
 
-app.post("/api/v1/users/signup", handleUserSignUp);
-app.post("/api/v1/regions/:regionId/stores", handleAddStore);
-app.post("/api/v1/stores/:storeId/reviews", handleAddReview);
-app.post("/api/v1/stores/:storeId/missions", handleAddMission);
-app.post("/api/v1/missions/:missionId/challenges", handleChallengeMission);
-app.post("/api/v1/members/signup", memberSignUpController);
+// 2. 미들웨어 설정
+app.use(cors()); // cors 방식 허용
+app.use(express.static("public")); // 정적 파일 접근
+app.use(express.json()); // JSON 본문 파싱
+app.use(express.urlencoded({ extended: false })); // URL-encoded 본문 파싱
+
+// 공통 미션 필수 탑재 미들웨어
+app.use(morgan("dev")); 
+app.use(cookieParser());
+
+// 3. TSOA 라우터 연결
+const router = express.Router();
+RegisterRoutes(router); 
+app.use("/api/v1", router);
+
+/**
+ * ⭐️ 워크북 스펙: 전역 오류 처리 미들웨어
+ */
+app.use((err: AppError, req: Request, res: Response, next: NextFunction) => {
+  if (res.headersSent) {
+    return next(err);
+  }
+
+  // ⭐️ [해결 핵심]: res.status() 뒤에 (res as any) 처리를 하여 error 메서드를 안전하게 호출
+  return (res.status(err.statusCode || 500) as any).error({
+    errorCode: err.errorCode || "unknown",
+    message: err.message || null,
+    data: err.data || null,
+  });
+});
 
 // 4. 서버 시작
 app.listen(port, () => {
-  console.log(`[server]: Server is running at <http://localhost>:${port}`);
+  console.log(`[server]: Server is running at http://localhost:${port}`);
 });
