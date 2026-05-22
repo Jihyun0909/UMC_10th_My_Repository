@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
-import { addMember } from "../repositories/member.repository";
-import { SignUpRequestDto } from "../dtos/member.dto";
+import { addMember } from "../repositories/member.repository.js";
+import { SignUpRequestDto } from "../dtos/member.dto.js";
 
 export const memberSignUp = async (data: SignUpRequestDto) => {
   // 1. 비밀번호 해싱 (Salt Round 10 사용)

@@ -7,7 +7,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "tsoa spec-and-routes && tsx src/index.ts",
-    "dev": "tsoa spec-and-routes && nodemon --exec tsx src/index.ts"
+    "dev": "tsoa spec-and-routes && nodemon --exec tsx src/index.ts",
+    "build": "tsc"
   },
   "dependencies": {
     "@prisma/adapter-mariadb": "^7.8.0",

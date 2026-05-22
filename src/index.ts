@@ -56,18 +56,25 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 /**
- * 전역 오류 처리 미들웨어
+ * 전역 오류 처리 미들웨어 (🚨 원인 추적용 디버깅 모드로 보정)
  */
-app.use((err: AppError, req: Request, res: Response, next: NextFunction) => {
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   if (res.headersSent) {
     return next(err);
   }
 
-  // res.status() 뒤에 (res as any) 처리를 하여 error 메서드를 안전하게 호출
-  return (res.status(err.statusCode || 500) as any).error({
-    errorCode: err.errorCode || "unknown",
-    message: err.message || null,
-    data: err.data || null,
+  // 1. 백엔드 실행 터미널(VSCode) 콘솔에 에러의 진짜 본모습과 발생 경로를 빨갛게 찍어버립니다.
+  console.error("🚨 [SERVER REAL ERROR]:", err);
+
+  // 2. 스웨거 응답 창에서도 에러 원인을 생생하게 볼 수 있도록 가리지 않고 리턴합니다.
+  return res.status(err.statusCode || 500).json({
+    resultType: "FAIL",
+    error: {
+      errorCode: err.errorCode || "unknown",
+      message: err.message || "원인 메시지가 없습니다. 터미널 창 로그를 확인하십시오.",
+      data: err.stack || null, // 에러 추적 스택 경로를 데이터에 밀어 넣음
+    },
+    success: null,
   });
 });
 

@@ -1,37 +1,32 @@
-import { UserSignUpRequest, UserSignUpResponse } from "../dtos/user.dto.js"; //인터페이스 가져오기
-import {
-  addUser,
-  getUser,
-  getUserPreferencesByUserId,
-  setPreference,
-} from "../repositories/user.repository.js";
+import { addUser, getUserPreferencesByUserId, setPreference } from "../repositories/user.repository.js";
+import { UserSignUpResponse } from "../dtos/user.dto.js";
 
-export const userSignUp = async (data: UserSignUpRequest): Promise<UserSignUpResponse> => {
-  const joinUserId = await addUser({
-    email: data.email,
-    name: data.name,
-    gender: data.gender,
-    birth: new Date(data.birth), // 문자열을 Date 객체로 변환해서 넘겨줍니다.
-    address: data.address,
-    detailAddress: data.detailAddress,
-    phoneNumber: data.phoneNumber,
+export const userSignUp = async (data: any): Promise<UserSignUpResponse> => {
+  // 💡 [해결 핵심]: birth 문자열을 Prisma가 안전하게 씹어 삼킬 수 있는 Date 객체로 파싱합니다.
+  const birthDate = data.birth ? new Date(data.birth) : null;
+
+  // 레포지토리에 보낼 때 원래 data 스펙에 birth만 Date 객체로 덮어씌웁니다.
+  const userId = await addUser({
+    ...data,
+    birth: birthDate
   });
 
-  if (joinUserId === null) {
+  if (userId === null) {
     throw new Error("이미 존재하는 이메일입니다.");
   }
 
-  for (const preference of data.preferences) {
-    await setPreference(joinUserId, preference);
+  const categories = data.preferCategory || [];
+  for (const categoryId of categories) {
+    await setPreference(userId, categoryId);
   }
 
-  const user = await getUser(joinUserId);
-  const userId = user!.id;
-  const preferences = (await getUserPreferencesByUserId(joinUserId)).map(
-    (obj) => obj.foodType.name,
-  );
-  return <UserSignUpResponse>{
+  const preferences = await getUserPreferencesByUserId(userId);
+
+  return {
     userId,
-    preferences,
-  };
+    preferences: preferences.map((obj: any) => obj.foodCategory.name),
+    email: data.email,
+    name: data.name,
+    preferCategory: categories
+  } as any;
 };

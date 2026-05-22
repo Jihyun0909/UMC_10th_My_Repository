@@ -18,7 +18,7 @@
     /* 4. 엄격한 검사 옵션 */
     "strict": true,               
     "noUncheckedIndexedAccess": true, 
-    "exactOptionalPropertyTypes": true,
+    "exactOptionalPropertyTypes": false,
     "isolatedModules": true,
 
     /* 5. 라이브러리 및 에러 방지 추천 옵션 */

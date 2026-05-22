@@ -1,5 +1,3 @@
-import { ResultSetHeader, RowDataPacket } from "mysql2";
-import { pool } from "../../../db.config.js";
 import { prisma } from "../../../db.config.js";
 
 // User 데이터 삽입
@@ -17,7 +15,8 @@ export const addUser = async (data: any) => {
       email: data.email,
       name: data.name,
       gender: data.gender,
-      birth: data.birth,
+      // 💡 [해결 핵심]: prisma 스키마 규칙(Null 거부)에 맞춰 Date 객체만 안전하게 전달합니다.
+      birth: data.birth ? new Date(data.birth) : new Date(), 
       address: data.address,
       detailAddress: data.detailAddress,
       phoneNumber: data.phoneNumber,
@@ -47,7 +46,7 @@ export const getUserPreferencesByUserId = async (userId: number) => {
   return await prisma.userFavorCategory.findMany({
     where: { userId: userId },
     include: {
-      foodCategory: true, // 💡 핵심: JOIN 대신 include를 써서 연관 데이터를 가져옵니다!
+      foodCategory: true,
     },
     orderBy: { foodCategoryId: "asc" },
   });

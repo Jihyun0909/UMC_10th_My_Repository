@@ -1,5 +1,5 @@
-import { addStore, checkRegionExists, getAllStoreReviews } from "../repositories/store.repositories";
-import { CreateStoreRequestDto, responseFromReviews, ReviewListResponse } from "../dtos/store.dtos";
+import { addStore, checkRegionExists, getAllStoreReviews } from "../repositories/store.repositories.js";
+import { CreateStoreRequestDto, responseFromReviews, ReviewListResponse } from "../dtos/store.dtos.js";
 import { prisma } from "../../../db.config.js";
 
 // 가게 등록
@@ -20,4 +20,3 @@ export const listStoreReviews = async (
   const reviews = await getAllStoreReviews(storeId, cursor);
   return responseFromReviews(reviews);
 };
-

@@ -1,7 +1,7 @@
-import { addMission } from "../repositories/mission.repositories";
+import { addMission } from "../repositories/mission.repositories.js";
 import { checkStoreExists } from "../repositories/review.repository.js"; // 기존 함수 재사용
-import { CreateMissionRequestDto } from "../dtos/mission.dtos";
-import { addMemberMission, isMissionAlreadyChallenging } from "../repositories/mission.repositories";
+import { CreateMissionRequestDto } from "../dtos/mission.dtos.js";
+import { addMemberMission, isMissionAlreadyChallenging } from "../repositories/mission.repositories.js";
 
 export const createMission = async (storeId: number, data: CreateMissionRequestDto) => {
   const isExist = await checkStoreExists(storeId);
