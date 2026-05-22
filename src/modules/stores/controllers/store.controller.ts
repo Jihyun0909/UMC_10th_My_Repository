@@ -1,6 +1,5 @@
 import { Body, Controller, Post, Get, Route, Tags, Path, Query, Response } from "tsoa";
 import { CreateStoreRequestDto, ReviewListResponse } from "../dtos/store.dtos.js";
-// 지현님이 만드신 진짜 서비스 함수 이름(createStore, listStoreReviews)을 정확하게 가져옵니다.
 import { createStore, listStoreReviews } from "../services/store.services.js";
 import { ApiResponse, success } from "../../../common/responses/response.js";
 

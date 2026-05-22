@@ -43,7 +43,6 @@ export class MissionController extends Controller {
   ): Promise<ApiResponse<any>> {
     console.log(`Mission ${missionId} challenge request received:`, body);
     
-    // [수정]: 오타가 발생한 challengeChallenge를 상단에서 임포트한 진짜 함수명인 challengeMission으로 일치시켰습니다.
     const result = await challengeMission(missionId, body.memberId);
     return success(result);
   }
