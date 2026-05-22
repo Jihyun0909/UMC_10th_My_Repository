@@ -1,51 +1,50 @@
-import { Request, Response, NextFunction } from "express";
-import { createMission, challengeMission } from "../services/mission.services";
-import { CreateMissionRequestDto } from "../dtos/mission.dtos";
+import { Body, Controller, Post, Route, Tags, Path, Response } from "tsoa";
+import { createMission, challengeMission } from "../services/mission.services.js";
+import { CreateMissionRequestDto } from "../dtos/mission.dtos.js";
+import { ApiResponse, success } from "../../../common/responses/response.js";
 
-export const handleAddMission = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { storeId } = req.params;
+export interface ChallengeMissionRequestDto {
+  memberId: number;
+}
 
-    if (!storeId || typeof storeId !== "string") {
-      res.status(400).json({ success: false, message: "유효한 가게 ID가 필요합니다." });
-      return;
-    }
-
-    const result = await createMission(parseInt(storeId), req.body as CreateMissionRequestDto);
-
-    res.status(200).json({
-      success: true,
-      code: "S200",
-      message: "가게 미션이 성공적으로 등록되었습니다!",
-      data: result,
-    });
-  } catch (error: any) {
-    res.status(500).json({ success: false, message: error.message });
+@Route("")
+@Tags("Missions")
+export class MissionController extends Controller {
+  /**
+   * 특정 가게에 새로운 미션 등록
+   * @param storeId 가게 고유 ID (PK)
+   * @param body 미션 생성 정보 객체 (CreateMissionRequestDto)
+   */
+  @Post("stores/{storeId}/missions")
+  @Response<ApiResponse<any>>(400, "잘못된 요청 (필수 값 누락 또는 데이터 형식 오류)")
+  @Response<ApiResponse<any>>(404, "존재하지 않는 가게 ID")
+  public async handleAddMission(
+    @Path() storeId: number,
+    @Body() body: CreateMissionRequestDto
+  ): Promise<ApiResponse<any>> {
+    console.log(`Store ${storeId} mission create request received:`, body);
+    
+    const result = await createMission(storeId, body);
+    return success(result);
   }
-};
 
-export const handleChallengeMission = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { missionId } = req.params;
-    const { memberId } = req.body;
-
-    if (!missionId || typeof missionId !== "string") {
-      res.status(400).json({ success: false, message: "유효한 미션 ID가 필요합니다." });
-      return;
-    }
-
-    const result = await challengeMission(parseInt(missionId), memberId);
-
-    res.status(200).json({
-      success: true,
-      code: "S200",
-      message: "미션 도전 시작!",
-      data: result,
-    });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: error.message // "이미 도전 중인 미션입니다." 메시지가 여기로 전달돼!
-    });
+  /**
+   * 유저의 특정 미션 도전 신청
+   * @param missionId 미션 고유 ID (PK)
+   * @param body 도전을 신청하는 유저 정보 (ChallengeMissionRequestDto)
+   */
+  @Post("missions/{missionId}/challenges")
+  @Response<ApiResponse<any>>(400, "잘못된 요청 (유효하지 않은 파라미터)")
+  @Response<ApiResponse<any>>(404, "존재하지 않는 미션 또는 유저 ID")
+  @Response<ApiResponse<any>>(409, "이미 해당 미션에 도전 중이거나 완료한 상태")
+  public async handleChallengeMission(
+    @Path() missionId: number,
+    @Body() body: ChallengeMissionRequestDto
+  ): Promise<ApiResponse<any>> {
+    console.log(`Mission ${missionId} challenge request received:`, body);
+    
+    // [수정]: 오타가 발생한 challengeChallenge를 상단에서 임포트한 진짜 함수명인 challengeMission으로 일치시켰습니다.
+    const result = await challengeMission(missionId, body.memberId);
+    return success(result);
   }
-};
+}

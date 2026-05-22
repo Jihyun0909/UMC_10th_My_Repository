@@ -99,6 +99,200 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"ApiResponse_any_": {
+				"properties": {
+					"resultType": {
+						"type": "string",
+						"enum": [
+							"SUCCESS"
+						],
+						"nullable": false
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					},
+					"data": {}
+				},
+				"required": [
+					"resultType",
+					"error",
+					"data"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CreateStoreRequestDto": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"address": {
+						"type": "string"
+					},
+					"categoryId": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"name",
+					"address",
+					"categoryId"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ReviewItem": {
+				"properties": {
+					"id": {
+						"type": "number",
+						"format": "double"
+					},
+					"body": {
+						"type": "string"
+					},
+					"score": {
+						"type": "number",
+						"format": "double"
+					},
+					"user": {
+						"properties": {
+							"name": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"name"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"id",
+					"body",
+					"score",
+					"user"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ReviewListResponse": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/ReviewItem"
+						},
+						"type": "array"
+					},
+					"pagination": {
+						"properties": {
+							"cursor": {
+								"type": "number",
+								"format": "double",
+								"nullable": true
+							}
+						},
+						"required": [
+							"cursor"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"data",
+					"pagination"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ApiResponse_ReviewListResponse_": {
+				"properties": {
+					"resultType": {
+						"type": "string",
+						"enum": [
+							"SUCCESS"
+						],
+						"nullable": false
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					},
+					"data": {
+						"$ref": "#/components/schemas/ReviewListResponse"
+					}
+				},
+				"required": [
+					"resultType",
+					"error",
+					"data"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CreateReviewRequestDto": {
+				"properties": {
+					"memberId": {
+						"type": "number",
+						"format": "double"
+					},
+					"score": {
+						"type": "number",
+						"format": "double"
+					},
+					"content": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"memberId",
+					"score",
+					"content"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CreateMissionRequestDto": {
+				"properties": {
+					"reward": {
+						"type": "number",
+						"format": "double"
+					},
+					"deadline": {
+						"type": "string"
+					},
+					"content": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"reward",
+					"deadline",
+					"content"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ChallengeMissionRequestDto": {
+				"properties": {
+					"memberId": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"memberId"
+				],
+				"type": "object",
+				"additionalProperties": false
 			}
 		},
 		"securitySchemes": {}
@@ -135,6 +329,333 @@
 						"application/json": {
 							"schema": {
 								"$ref": "#/components/schemas/UserSignUpRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/regions/{regionId}/stores": {
+			"post": {
+				"operationId": "HandleAddStore",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiResponse_any_"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "잘못된 요청 (필수 값 누락 또는 데이터 형식 오류)",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiResponse_any_"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "존재하지 않는 지역 ID",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiResponse_any_"
+								}
+							}
+						}
+					}
+				},
+				"description": "특정 지역에 새로운 가게 추가",
+				"tags": [
+					"Stores"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "지역 고유 ID (PK)",
+						"in": "path",
+						"name": "regionId",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				],
+				"requestBody": {
+					"description": "가게 생성 정보 (CreateStoreRequestDto)",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateStoreRequestDto",
+								"description": "가게 생성 정보 (CreateStoreRequestDto)"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/stores/{storeId}/reviews": {
+			"get": {
+				"operationId": "HandleListStoreReviews",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiResponse_ReviewListResponse_"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "존재하지 않는 가게 ID",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiResponse_any_"
+								}
+							}
+						}
+					}
+				},
+				"description": "특정 가게의 리뷰 목록 페이징 조회",
+				"tags": [
+					"Reviews"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "가게 고유 ID (PK)",
+						"in": "path",
+						"name": "storeId",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"description": "페이징용 커서 번호 (기본값 0)",
+						"in": "query",
+						"name": "cursor",
+						"required": false,
+						"schema": {
+							"default": 0,
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			},
+			"post": {
+				"operationId": "HandleAddReview",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiResponse_any_"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "잘못된 요청 (필수 값 누락 또는 데이터 형식 오류)",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiResponse_any_"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "존재하지 않는 가게 ID",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiResponse_any_"
+								}
+							}
+						}
+					}
+				},
+				"description": "특정 가게에 새로운 리뷰 작성",
+				"tags": [
+					"Reviews"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "가게 고유 ID (PK)",
+						"in": "path",
+						"name": "storeId",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				],
+				"requestBody": {
+					"description": "리뷰 생성 정보 객체 (CreateReviewRequestDto)",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateReviewRequestDto",
+								"description": "리뷰 생성 정보 객체 (CreateReviewRequestDto)"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/stores/{storeId}/missions": {
+			"post": {
+				"operationId": "HandleAddMission",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiResponse_any_"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "잘못된 요청 (필수 값 누락 또는 데이터 형식 오류)",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiResponse_any_"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "존재하지 않는 가게 ID",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiResponse_any_"
+								}
+							}
+						}
+					}
+				},
+				"description": "특정 가게에 새로운 미션 등록",
+				"tags": [
+					"Missions"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "가게 고유 ID (PK)",
+						"in": "path",
+						"name": "storeId",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				],
+				"requestBody": {
+					"description": "미션 생성 정보 객체 (CreateMissionRequestDto)",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateMissionRequestDto",
+								"description": "미션 생성 정보 객체 (CreateMissionRequestDto)"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/missions/{missionId}/challenges": {
+			"post": {
+				"operationId": "HandleChallengeMission",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiResponse_any_"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "잘못된 요청 (유효하지 않은 파라미터)",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiResponse_any_"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "존재하지 않는 미션 또는 유저 ID",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiResponse_any_"
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "이미 해당 미션에 도전 중이거나 완료한 상태",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiResponse_any_"
+								}
+							}
+						}
+					}
+				},
+				"description": "유저의 특정 미션 도전 신청",
+				"tags": [
+					"Missions"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "미션 고유 ID (PK)",
+						"in": "path",
+						"name": "missionId",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				],
+				"requestBody": {
+					"description": "도전을 신청하는 유저 정보 (ChallengeMissionRequestDto)",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ChallengeMissionRequestDto",
+								"description": "도전을 신청하는 유저 정보 (ChallengeMissionRequestDto)"
 							}
 						}
 					}

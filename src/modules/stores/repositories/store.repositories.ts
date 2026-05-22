@@ -27,3 +27,29 @@ export const addStore = async (regionId: number, data: CreateStoreRequestDto): P
   });
   return newStore.id;
 };
+
+/**
+ * 특정 가게의 리뷰 목록을 페이징 조건에 맞추어 조회
+ * @param storeId 가게 고유 ID (PK)
+ * @param cursor 페이징 처리를 위한 기준 리뷰 ID
+ * @returns 조회된 리뷰 데이터 및 작성자 정보 배열
+ */
+export const getAllStoreReviews = async (storeId: number, cursor: number) => {
+  if (cursor) {
+    return await prisma.review.findMany({
+      where: { storeId: storeId },
+      take: 10,
+      skip: 1,
+      cursor: { id: cursor },
+      orderBy: { id: "desc" },
+      include: { user: true }
+    });
+  }
+
+  return await prisma.review.findMany({
+    where: { storeId: storeId },
+    take: 10,
+    orderBy: { id: "desc" },
+    include: { user: true }
+  });
+};

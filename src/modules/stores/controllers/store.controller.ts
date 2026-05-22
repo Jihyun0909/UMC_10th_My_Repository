@@ -1,54 +1,47 @@
-import { Request, Response, NextFunction } from "express";
-import { createStore, listStoreReviews } from "../services/store.services.js"; // 확장자 .js 확인!
-import { CreateStoreRequestDto } from "../dtos/store.dtos.js";
-import { StatusCodes } from "http-status-codes";
+import { Body, Controller, Post, Get, Route, Tags, Path, Query, Response } from "tsoa";
+import { CreateStoreRequestDto, ReviewListResponse } from "../dtos/store.dtos.js";
+// 지현님이 만드신 진짜 서비스 함수 이름(createStore, listStoreReviews)을 정확하게 가져옵니다.
+import { createStore, listStoreReviews } from "../services/store.services.js";
+import { ApiResponse, success } from "../../../common/responses/response.js";
 
-
-export const handleAddStore = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { regionId } = req.params;
-
-    // 🚨 타입 가드: regionId가 없거나, 배열(string[])인 경우를 제외함
-    if (!regionId || typeof regionId !== "string") {
-      res.status(400).json({
-        success: false,
-        message: "유효한 지역 ID가 요청 경로에 포함되지 않았습니다."
-      });
-      return;
-    }
-
-    const result = await createStore(parseInt(regionId), req.body as CreateStoreRequestDto);
-
-    res.status(200).json({
-      success: true,
-      code: "S200",
-      message: "가게 등록 성공!",
-      data: result,
-    });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+@Route("regions")
+@Tags("Stores")
+export class StoreController extends Controller {
+  /**
+   * 특정 지역에 새로운 가게 추가
+   * @param regionId 지역 고유 ID (PK)
+   * @param body 가게 생성 정보 (CreateStoreRequestDto)
+   */
+  @Post("{regionId}/stores")
+  @Response<ApiResponse<any>>(400, "잘못된 요청 (필수 값 누락 또는 데이터 형식 오류)")
+  @Response<ApiResponse<any>>(404, "존재하지 않는 지역 ID")
+  public async handleAddStore(
+    @Path() regionId: number,
+    @Body() body: CreateStoreRequestDto
+  ): Promise<ApiResponse<any>> {
+    console.log(`Region ${regionId} store add request received:`, body);
+    // 원래 정의하신 createStore 함수를 호출하여 { storeId } 객체를 그대로 리턴합니다.
+    const result = await createStore(regionId, body);
+    return success(result);
   }
-};
+}
 
-export const handleListStoreReviews = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const storeId = parseInt(req.params.storeId as string, 10);
-    const cursor =
-    typeof req.query.cursor === "string"
-      ? parseInt(req.query.cursor, 10)
-      : 0;
-
-    const reviews = await listStoreReviews(storeId, cursor);
-
-    res.status(StatusCodes.OK).json(reviews);
-  } catch (err) {
-    next(err);
+@Route("stores")
+export class StoreReviewController extends Controller {
+  /**
+   * 특정 가게의 리뷰 목록 페이징 조회
+   * @param storeId 가게 고유 ID (PK)
+   * @param cursor 페이징용 커서 번호 (기본값 0)
+   */
+  @Get("{storeId}/reviews")
+  @Tags("Reviews")
+  @Response<ApiResponse<any>>(404, "존재하지 않는 가게 ID")
+  public async handleListStoreReviews(
+    @Path() storeId: number,
+    @Query() cursor: number = 0
+  ): Promise<ApiResponse<ReviewListResponse>> {
+    console.log(`Store ${storeId} review list request received (cursor: ${cursor})`);
+    const result = await listStoreReviews(storeId, cursor);
+    return success(result);
   }
-};
+}

@@ -1,20 +1,9 @@
 export interface CreateStoreRequestDto {
   name: string;
   address: string;
-  categoryId: number; // ERD의 category_id와 매칭
+  categoryId: number; 
 }
 
-export const responseFromReviews = (reviews: any[]) => {
-  return {
-    data: reviews,
-    pagination: {
-      // 마지막 리뷰의 ID를 다음 커서로 사용! 데이터가 없으면 null
-      cursor: reviews.length > 0 ? reviews[reviews.length - 1].id : null,
-    },
-  };
-};
-
-// 리뷰 모양 정의
 export interface ReviewItem {
   id: number;
   body: string;
@@ -30,3 +19,16 @@ export interface ReviewListResponse {
     cursor: number | null;
   };
 }
+
+export const responseFromReviews = (reviews: any[]) => {
+  return {
+    data: reviews,
+    pagination: {
+      cursor: reviews.length > 0 ? reviews[reviews.length - 1].id : null,
+    },
+  };
+};
+
+// 상위 호환성 및 라우팅 명세 매핑용 별칭 타입 지정
+export type StoreRequestDto = CreateStoreRequestDto;
+export type StoreResponseDto = { storeId: number; name: string; address: string; categoryId: number; };
