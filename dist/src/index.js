@@ -63,6 +63,43 @@ app.get("/mypage", isLogin, (req, res) => {
         },
     });
 });
+/* ==========================================
+ * 🍒 [공통 미션 1]: 기존 API 보호 및 하드코딩 제거 라우트 구현
+ * ========================================== */
+/**
+ * 리뷰 작성 API (isLogin 인증 적용)
+ * 기존의 고정된 유저 ID 하드코딩을 탈피하고 토큰에서 추출한 동적 ID를 매핑합니다.
+ */
+app.post("/api/v1/reviews", isLogin, (req, res) => {
+    // 토큰 검증 미들웨어를 통과했으므로 req.user에서 안전하게 고유 식별자를 꺼냅니다.
+    const loginUserId = req.user.id;
+    // 비즈니스 데이터 처리는 유저님의 서비스단 함수(예: reviewService.create)로 위임하여 처리하시면 됩니다.
+    res.status(200).json({
+        resultType: "SUCCESS",
+        error: null,
+        success: {
+            message: "인증된 사용자의 리뷰 생성이 요청되었습니다.",
+            authenticatedUserId: loginUserId, // 하드코딩 탈출 검증용
+            receivedBody: req.body
+        }
+    });
+});
+/**
+ * 가게 추가 API (isLogin 인증 적용)
+ */
+app.post("/api/v1/stores", isLogin, (req, res) => {
+    const loginUserId = req.user.id;
+    res.status(200).json({
+        resultType: "SUCCESS",
+        error: null,
+        success: {
+            message: "인증된 사용자의 신규 가게 등록이 요청되었습니다.",
+            authenticatedUserId: loginUserId,
+            receivedBody: req.body
+        }
+    });
+});
+// ==========================================
 // Swagger UI 라우터 연결 (http://localhost:3000/docs)
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerFile));
 // 6. TSOA 라우터 연결
