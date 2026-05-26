@@ -21,9 +21,9 @@ export declare const addReview: (storeId: number, data: CreateReviewRequestDto) 
  */
 export declare const getUserReviews: (userId: number, cursor?: number, limit?: number) => Promise<({
     store: {
+        id: number;
         name: string;
         address: string;
-        id: number;
         category: string;
     };
 } & {

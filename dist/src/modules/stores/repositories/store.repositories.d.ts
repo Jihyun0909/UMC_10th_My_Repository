@@ -21,13 +21,13 @@ export declare const addStore: (regionId: number, data: CreateStoreRequestDto) =
 export declare const getAllStoreReviews: (storeId: number, cursor: number) => Promise<({
     user: {
         email: string;
+        id: number;
         name: string;
         gender: string;
         birth: Date;
         address: string;
         detailAddress: string | null;
         phoneNumber: string;
-        id: number;
     };
 } & {
     id: number;

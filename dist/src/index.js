@@ -6,14 +6,21 @@ import cookieParser from "cookie-parser"; // 공통 미션: 쿠키 파싱 미들
 import swaggerUi from "swagger-ui-express"; // Swagger UI 미들웨어
 import path from "path";
 import fs from "fs";
+import passport from "passport"; // 9주차: 패스포트 미들웨어 추가
 import { RegisterRoutes } from "./generated/routes.js";
+// auth.config.ts에서 완성된 두 전략과 검증 미들웨어를 가져옵니다.
+import { googleStrategy, jwtStrategy, isLogin } from "./auth.config.js";
 // 1. 환경 변수 설정
 dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
-// 2. TSOA가 생성한 swagger.json 읽어오기 (ESM 환경 동기식 로드)
+// 2. Passport 라이브러리에 구글 로그인 및 JWT 검증 전략 등록
+passport.use(googleStrategy);
+passport.use(jwtStrategy);
+app.use(passport.initialize());
+// 3. TSOA가 생성한 swagger.json 읽어오기 (ESM 환경 동기식 로드)
 const swaggerFile = JSON.parse(fs.readFileSync(path.resolve("dist/swagger.json"), "utf8"));
-// [해결 핵심]: res 객체를 임시로 any로 변환하여 에러 확장 방식 우회
+// res 객체를 임시로 any로 변환하여 에러 확장 방식 우회
 app.use((req, res, next) => {
     res.error = function ({ errorCode = null, message = null, data = null }) {
         return this.json({
@@ -24,7 +31,7 @@ app.use((req, res, next) => {
     };
     next();
 });
-// 3. 미들웨어 설정
+// 4. 미들웨어 설정
 app.use(cors()); // cors 방식 허용
 app.use(express.static("public")); // 정적 파일 접근
 app.use(express.json()); // JSON 본문 파싱
@@ -32,9 +39,33 @@ app.use(express.urlencoded({ extended: false })); // URL-encoded 본문 파싱
 // 공통 미션 필수 탑재 미들웨어
 app.use(morgan("dev"));
 app.use(cookieParser());
+// 5. 구글 OAuth 일반 Express 라우트 배치
+app.get("/oauth2/login/google", passport.authenticate("google", { session: false }));
+app.get("/oauth2/callback/google", passport.authenticate("google", { session: false, failureRedirect: "/login-failed" }), (req, res) => {
+    // 인증에 성공하면 passport-google-oauth20 전략에서 cb(null, tokens)로 넘겨준 데이터가 req.user에 안착합니다.
+    res.status(200).json({ success: true, tokens: req.user });
+});
+// 구글 인증 실패 시 리다이렉트될 예외 페이지 라우트
+app.get("/login-failed", (req, res) => {
+    return res.error({
+        errorCode: "AUTH001",
+        message: "구글 소셜 로그인 인증에 실패했습니다.",
+    });
+});
+// 헤더에 Authorization: Bearer <토큰>을 보내면 isLogin이 유효성을 검사하고 정보를 넘겨줍니다.
+app.get("/mypage", isLogin, (req, res) => {
+    res.status(200).json({
+        resultType: "SUCCESS",
+        error: null,
+        success: {
+            message: `인증 성공! ${req.user.name}님의 마이페이지입니다.`,
+            user: req.user,
+        },
+    });
+});
 // Swagger UI 라우터 연결 (http://localhost:3000/docs)
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerFile));
-// 4. TSOA 라우터 연결 (5, 6, 7주차 API를 컴파일러가 자동 인식해서 한 몸으로 묶어줍니다!)
+// 6. TSOA 라우터 연결
 const router = express.Router();
 RegisterRoutes(router);
 app.use("/api/v1", router);
@@ -49,14 +80,18 @@ app.use((err, req, res, next) => {
     if (res.headersSent) {
         return next(err);
     }
-    // res.status() 뒤에 (res as any) 처리를 하여 error 메서드를 안전하게 호출
-    return res.status(err.statusCode || 500).error({
-        errorCode: err.errorCode || "unknown",
-        message: err.message || null,
-        data: err.data || null,
+    console.error("🚨 [SERVER REAL ERROR]:", err);
+    return res.status(err.statusCode || 500).json({
+        resultType: "FAIL",
+        error: {
+            errorCode: err.errorCode || "unknown",
+            message: err.message || "원인 메시지가 없습니다. 터미널 창 로그를 확인하십시오.",
+            data: err.stack || null,
+        },
+        success: null,
     });
 });
-// 5. 서버 시작
+// 7. 서버 시작
 app.listen(port, () => {
     console.log(`[server]: Server is running at http://localhost:${port}`);
 });

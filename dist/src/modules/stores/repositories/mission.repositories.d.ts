@@ -44,9 +44,9 @@ export declare const getStoreMissions: (storeId: number, cursor?: number, limit?
 export declare const getOngoingMissions: (userId: number, cursor?: number, limit?: number) => Promise<({
     mission: {
         store: {
+            id: number;
             name: string;
             address: string;
-            id: number;
             category: string;
         };
     } & {

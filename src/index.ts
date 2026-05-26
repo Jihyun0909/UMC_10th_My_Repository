@@ -6,8 +6,11 @@ import cookieParser from "cookie-parser"; // 공통 미션: 쿠키 파싱 미들
 import swaggerUi from "swagger-ui-express"; // Swagger UI 미들웨어
 import path from "path";
 import fs from "fs";
+import passport from "passport"; // 9주차: 패스포트 미들웨어 추가
 import { RegisterRoutes } from "./generated/routes.js";
 import { AppError } from "./common/errors/app.error.js";
+// auth.config.ts에서 완성된 두 전략과 검증 미들웨어를 가져옵니다.
+import { googleStrategy, jwtStrategy, isLogin } from "./auth.config.js"; 
 
 // 1. 환경 변수 설정
 dotenv.config();
@@ -15,12 +18,17 @@ dotenv.config();
 const app: Express = express();
 const port = process.env.PORT || 3000;
 
-// 2. TSOA가 생성한 swagger.json 읽어오기 (ESM 환경 동기식 로드)
+// 2. Passport 라이브러리에 구글 로그인 및 JWT 검증 전략 등록
+passport.use(googleStrategy);
+passport.use(jwtStrategy); 
+app.use(passport.initialize());
+
+// 3. TSOA가 생성한 swagger.json 읽어오기 (ESM 환경 동기식 로드)
 const swaggerFile = JSON.parse(
   fs.readFileSync(path.resolve("dist/swagger.json"), "utf8")
 );
 
-// [해결 핵심]: res 객체를 임시로 any로 변환하여 에러 확장 방식 우회
+// res 객체를 임시로 any로 변환하여 에러 확장 방식 우회
 app.use((req: Request, res: Response, next: NextFunction) => {
   (res as any).error = function ({ errorCode = null, message = null, data = null }) {
     return this.json({
@@ -32,7 +40,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
-// 3. 미들웨어 설정
+// 4. 미들웨어 설정
 app.use(cors()); // cors 방식 허용
 app.use(express.static("public")); // 정적 파일 접근
 app.use(express.json()); // JSON 본문 파싱
@@ -42,10 +50,41 @@ app.use(express.urlencoded({ extended: false })); // URL-encoded 본문 파싱
 app.use(morgan("dev")); 
 app.use(cookieParser());
 
+// 5. 구글 OAuth 일반 Express 라우트 배치
+app.get("/oauth2/login/google", passport.authenticate("google", { session: false }));
+
+app.get("/oauth2/callback/google", 
+  passport.authenticate("google", { session: false, failureRedirect: "/login-failed" }),
+  (req: Request, res: Response) => {
+    // 인증에 성공하면 passport-google-oauth20 전략에서 cb(null, tokens)로 넘겨준 데이터가 req.user에 안착합니다.
+    res.status(200).json({ success: true, tokens: req.user });
+  }
+);
+
+// 구글 인증 실패 시 리다이렉트될 예외 페이지 라우트
+app.get("/login-failed", (req: Request, res: Response) => {
+  return (res as any).error({
+    errorCode: "AUTH001",
+    message: "구글 소셜 로그인 인증에 실패했습니다.",
+  });
+});
+
+// 헤더에 Authorization: Bearer <토큰>을 보내면 isLogin이 유효성을 검사하고 정보를 넘겨줍니다.
+app.get("/mypage", isLogin, (req: Request, res: Response) => {
+  res.status(200).json({
+    resultType: "SUCCESS",
+    error: null,
+    success: {
+      message: `인증 성공! ${(req.user as any).name}님의 마이페이지입니다.`,
+      user: req.user,
+    },
+  });
+});
+
 // Swagger UI 라우터 연결 (http://localhost:3000/docs)
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
-// 4. TSOA 라우터 연결 (5, 6, 7주차 API를 컴파일러가 자동 인식해서 한 몸으로 묶어줍니다!)
+// 6. TSOA 라우터 연결
 const router = express.Router();
 RegisterRoutes(router); 
 app.use("/api/v1", router);
@@ -56,29 +95,27 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 /**
- * 전역 오류 처리 미들웨어 (🚨 원인 추적용 디버깅 모드로 보정)
+ * 전역 오류 처리 미들웨어
  */
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   if (res.headersSent) {
     return next(err);
   }
 
-  // 1. 백엔드 실행 터미널(VSCode) 콘솔에 에러의 진짜 본모습과 발생 경로를 빨갛게 찍어버립니다.
   console.error("🚨 [SERVER REAL ERROR]:", err);
 
-  // 2. 스웨거 응답 창에서도 에러 원인을 생생하게 볼 수 있도록 가리지 않고 리턴합니다.
   return res.status(err.statusCode || 500).json({
     resultType: "FAIL",
     error: {
       errorCode: err.errorCode || "unknown",
       message: err.message || "원인 메시지가 없습니다. 터미널 창 로그를 확인하십시오.",
-      data: err.stack || null, // 에러 추적 스택 경로를 데이터에 밀어 넣음
+      data: err.stack || null,
     },
     success: null,
   });
 });
 
-// 5. 서버 시작
+// 7. 서버 시작
 app.listen(port, () => {
   console.log(`[server]: Server is running at http://localhost:${port}`);
 });
