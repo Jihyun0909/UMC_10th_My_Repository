@@ -51,3 +51,17 @@ export const getUserPreferencesByUserId = async (userId: number) => {
     orderBy: { foodCategoryId: "asc" },
   });
 };
+
+// 유저 고유 ID를 기반으로 성별, 생일, 주소, 전화번호를 찾아 갱신합니다.
+export const updateUserInfo = async (userId: number, updateData: any) => {
+  return await prisma.user.update({
+    where: { id: userId },
+    data: {
+      gender: updateData.gender,
+      birth: updateData.birth ? new Date(updateData.birth) : undefined,
+      address: updateData.address,
+      detailAddress: updateData.detailAddress,
+      phoneNumber: updateData.phoneNumber,
+    },
+  });
+};

@@ -2,6 +2,8 @@ import { addUser, getUserPreferencesByUserId, setPreference } from "../repositor
 import { UserSignUpResponse } from "../dtos/user.dto.js";
 // 🚨 [피드백 반영]: 7주차 에러 정의 파일에서 커스텀 에러 클래스를 가져옵니다.
 import { DuplicateUserEmailError } from "../../../common/errors/error.js"; 
+import { updateUserInfo } from "../repositories/user.repository.js";
+
 
 export const userSignUp = async (data: any): Promise<UserSignUpResponse> => {
   // birth 문자열을 Prisma 형식에 맞추어 Date 객체로 변환합니다.
@@ -32,4 +34,10 @@ export const userSignUp = async (data: any): Promise<UserSignUpResponse> => {
     name: data.name,
     preferCategory: categories
   } as any;
+};
+
+export const updateMyProfile = async (userId: number, profileData: any) => {
+  // 비즈니스 로직에 맞춰 레포지토리 함수를 호출하고 결과를 반환합니다.
+  const updatedUser = await updateUserInfo(userId, profileData);
+  return updatedUser;
 };

@@ -9,8 +9,12 @@ import fs from "fs";
 import passport from "passport"; // 9주차: 패스포트 미들웨어 추가
 import { RegisterRoutes } from "./generated/routes.js";
 import { AppError } from "./common/errors/app.error.js";
-// auth.config.ts에서 완성된 두 전략과 검증 미들웨어를 가져옵니다.
 import { googleStrategy, jwtStrategy, isLogin } from "./auth.config.js"; 
+
+// 🚨 [도메인 분리 반영]: 세 개로 개별 격리한 라우터 파일들을 임포트합니다.
+import { userRouter } from "./routers/user.router.js";
+import { reviewRouter } from "./routers/review.router.js";
+import { storeRouter } from "./routers/store.router.js";
 
 // 1. 환경 변수 설정
 dotenv.config();
@@ -82,45 +86,13 @@ app.get("/mypage", isLogin, (req: Request, res: Response) => {
 });
 
 /* ==========================================
- * 🍒 [공통 미션 1]: 기존 API 보호 및 하드코딩 제거 라우트 구현
+ * 🍒 [공통 미션 1, 2 반영]: 외부 도메인 라우터 조립 관리 구역
  * ========================================== */
 
-/**
- * 리뷰 작성 API (isLogin 인증 적용)
- * 기존의 고정된 유저 ID 하드코딩을 탈피하고 토큰에서 추출한 동적 ID를 매핑합니다.
- */
-app.post("/api/v1/reviews", isLogin, (req: Request, res: Response) => {
-  // 토큰 검증 미들웨어를 통과했으므로 req.user에서 안전하게 고유 식별자를 꺼냅니다.
-  const loginUserId = (req.user as any).id;
-
-  // 비즈니스 데이터 처리는 유저님의 서비스단 함수(예: reviewService.create)로 위임하여 처리하시면 됩니다.
-  res.status(200).json({
-    resultType: "SUCCESS",
-    error: null,
-    success: {
-      message: "인증된 사용자의 리뷰 생성이 요청되었습니다.",
-      authenticatedUserId: loginUserId, // 하드코딩 탈출 검증용
-      receivedBody: req.body
-    }
-  });
-});
-
-/**
- * 가게 추가 API (isLogin 인증 적용)
- */
-app.post("/api/v1/stores", isLogin, (req: Request, res: Response) => {
-  const loginUserId = (req.user as any).id;
-
-  res.status(200).json({
-    resultType: "SUCCESS",
-    error: null,
-    success: {
-      message: "인증된 사용자의 신규 가게 등록이 요청되었습니다.",
-      authenticatedUserId: loginUserId,
-      receivedBody: req.body
-    }
-  });
-});
+// 개별 라우터 내부에서 'isLogin' 가드 처리가 끝난 뒤 진입하므로, 대문 엔드포인트만 매핑합니다.
+app.use("/api/v1/users", userRouter);     // PATCH /api/v1/users/me 연동
+app.use("/api/v1/reviews", reviewRouter); // POST /api/v1/reviews/ 연동
+app.use("/api/v1/stores", storeRouter);   // POST /api/v1/stores/ 연동
 
 // ==========================================
 
