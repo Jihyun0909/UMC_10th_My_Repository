@@ -1,0 +1,46 @@
+name: deploy-main
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Inject environment variables
+        run: |
+          cat > .env <<'EOF'
+          ${{ secrets.EC2_DOT_ENV }}
+          EOF
+        env:
+          EC2_DOT_ENV: ${{ secrets.EC2_DOT_ENV }}
+
+      - name: Generate + Build
+        run: npm run build
+
+      - name: Pack artifact
+        run: |
+          mkdir -p artifact
+          cp -r dist artifact/dist
+          cp package.json package-lock.json prisma.config.ts artifact/
+          tar -czf artifact.tgz -C artifact .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-artifact
+          path: artifact.tgz

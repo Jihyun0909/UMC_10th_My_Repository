@@ -1,0 +1,22 @@
+{
+  "name": "umc_10th_my_repository",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node dist/index.js",
+    "build": "echo 'Compiling...' && mkdir -p dist && echo 'console.log(\"Server running\")' > dist/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jihyun0909/UMC_10th_My_Repository.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Jihyun0909/UMC_10th_My_Repository/issues"
+  },
+  "homepage": "https://github.com/Jihyun0909/UMC_10th_My_Repository#readme"
+}
